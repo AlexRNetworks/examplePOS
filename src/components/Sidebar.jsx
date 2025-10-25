@@ -1,40 +1,48 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
+// Define all navigation items, including the new Inventory page
 const navItems = [
   { name: 'Dashboard', path: '/', icon: '📊' },
   { name: 'Menu Management', path: '/menu-management', icon: '🍽️' },
   { name: 'User Management', path: '/user-management', icon: '👥' },
+  { name: 'Inventory/Stock', path: '/inventory', icon: '📦' }, // <-- NEW INVENTORY LINK
   { name: 'System Settings', path: '/system-settings', icon: '⚙️' },
-  { name: 'Inventory/Stock', path: '/inventory', icon: '📦' },
 ];
 
 const Sidebar = () => {
-  const location = useLocation();
-  
   return (
-    <div className="flex flex-col w-64 bg-gray-800 text-white p-4">
-      <div className="text-2xl font-bold mb-6 text-yellow-400">POS Admin Trainer</div>
-      <nav className="flex-1">
+    <div className="flex flex-col w-64 bg-gray-900 text-white shadow-xl">
+      
+      {/* App Branding/Title */}
+      <div className="h-20 flex items-center justify-center border-b border-gray-700">
+        <h1 className="text-2xl font-extrabold text-indigo-400">POS Admin</h1>
+      </div>
+
+      {/* Navigation Links */}
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {navItems.map((item) => (
-          <Link
+          <NavLink
             key={item.name}
             to={item.path}
-            // Highlight the link if the current path matches
-            className={`flex items-center p-3 rounded-lg transition-colors duration-200 
-              ${location.pathname === item.path 
-                ? 'bg-gray-700 font-semibold' 
-                : 'hover:bg-gray-700'
-              }`
+            // Use Tailwind classes for styling based on active state
+            className={({ isActive }) => 
+              `flex items-center space-x-3 p-3 rounded-lg transition-colors duration-200 
+              ${isActive 
+                ? 'bg-indigo-600 text-white shadow-md' 
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`
             }
           >
-            <span className="mr-3">{item.icon}</span>
-            {item.name}
-          </Link>
+            <span className="text-xl">{item.icon}</span>
+            <span className="font-medium">{item.name}</span>
+          </NavLink>
         ))}
       </nav>
-      <div className="mt-auto pt-4 border-t border-gray-700 text-sm text-gray-400">
-        Version: 1.0 (Mock)
+
+      {/* Footer / Version Info */}
+      <div className="p-4 border-t border-gray-700 text-xs text-gray-500">
+        <p>POS Admin Trainer v1.0</p>
+        <p>IT Simulation Mode Active</p>
       </div>
     </div>
   );
