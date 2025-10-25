@@ -10,8 +10,16 @@ const SystemSettings = () => {
         autoBackup: true
     });
     
+    // Handles mock saving of the form data
     const handleSave = () => {
-        alert(`System settings SAVED (Mock Action):\nTax: ${settings.taxRate}%\nTerminals: ${settings.terminalCount}`);
+        alert(`SUCCESS: System settings SAVED (Mock Action):\nTax: ${settings.taxRate}%\nTerminals: ${settings.terminalCount}`);
+    };
+
+    // Handles mock clearing of the cache (A common IT task)
+    const handleClearCache = () => {
+        if (window.confirm("Are you sure you want to clear the local POS cache on all terminals? This requires terminals to restart.")) {
+            alert("ACTION: Local POS cache cleared on all devices. Terminals will experience a brief reboot. (Mock Action)");
+        }
     };
 
     const handleChange = (e) => {
@@ -86,6 +94,16 @@ const SystemSettings = () => {
                         />
                         <span className="text-gray-700">Enable Daily Cloud Backup</span>
                     </label>
+                </div>
+
+                <div className="mt-8 pt-4 border-t border-gray-200">
+                    <h4 className="text-lg font-semibold mb-2 text-red-700">System Utilities</h4>
+                    <button 
+                        onClick={handleClearCache}
+                        className="bg-red-500 text-white p-3 rounded-md hover:bg-red-600 transition-colors shadow-lg"
+                    >
+                        🚨 Clear Local POS Cache (Troubleshooting)
+                    </button>
                 </div>
 
                 <button 
