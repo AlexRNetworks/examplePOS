@@ -1,1 +1,7 @@
-
+[build]
+  command = "npm run build"
+  publish = "build"
+  
+[context.production.environment]
+  # Mock API URL placeholder (Not needed for mock data, but good practice to include)
+  REACT_APP_API_URL = "http://mock-pos-trainer.com/api"
