@@ -1,1 +1,27 @@
 
+[
+  {
+    "id": 101,
+    "name": "House Salad",
+    "price": 9.99,
+    "category": "Appetizers",
+    "active": true,
+    "inventory_link": "lettuce, tomato, cucumber"
+  },
+  {
+    "id": 205,
+    "name": "Filet Mignon (8oz)",
+    "price": 34.50,
+    "category": "Entrees",
+    "active": true,
+    "inventory_link": "8oz_beef_filet, butter"
+  },
+  {
+    "id": 310,
+    "name": "Espresso Shot",
+    "price": 3.00,
+    "category": "Beverages",
+    "active": false,
+    "inventory_link": "espresso_beans"
+  }
+]
