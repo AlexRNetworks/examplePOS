@@ -2,10 +2,24 @@ import React, { useState } from 'react';
 import mockMenuData from '../data/mockMenu.json'; 
 
 const MenuManagement = () => {
+    // Initial state setup
     const [menuItems, setMenuItems] = useState(mockMenuData);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [currentItem, setCurrentItem] = useState(null); // Item currently being edited
+    const [currentItem, setCurrentItem] = useState(null); 
     const [filterCategory, setFilterCategory] = useState('All');
+
+    // MOCK STOCK STATE: Used to simulate inventory levels
+    const [mockStock, setMockStock] = useState({
+        'lettuce, tomato, cucumber': 50,
+        '8oz_beef_filet, butter': 12, // Low stock example
+        'espresso_beans': 100,
+        'NEW_ITEM_INVENTORY_ID': 50,
+    });
+
+    // Helper function to get stock level
+    const getStockLevel = (link) => {
+        return mockStock[link] !== undefined ? mockStock[link] : 0;
+    };
 
     // --- MOCK CRUD OPERATIONS ---
 
@@ -24,17 +38,35 @@ const MenuManagement = () => {
         }));
     };
 
-    // Saves the changes (Mock Update)
+    // Saves the changes (Mock Update/Add Logic)
     const saveChanges = () => {
         if (!currentItem) return;
 
-        const updatedMenu = menuItems.map(item =>
-            item.id === currentItem.id ? currentItem : item
-        );
+        let updatedMenu;
+        
+        // Check if the item ID is negative (Our sign for a NEW item)
+        if (currentItem.id < 0) {
+            // New Item Logic (ADD)
+            const permanentId = Math.floor(Math.random() * 1000) + 500; 
+            const newItem = { ...currentItem, id: permanentId };
+            updatedMenu = [newItem, ...menuItems]; // Add to the top of the list
+            alert(`SUCCESS: NEW Item ${newItem.name} added with ID ${permanentId}.`);
+
+            // MOCK: Initialize stock for the new item if inventory_link is provided
+            if (newItem.inventory_link) {
+                setMockStock(prev => ({ ...prev, [newItem.inventory_link]: 50 }));
+            }
+
+        } else {
+            // Existing Item Logic (UPDATE)
+            updatedMenu = menuItems.map(item =>
+                item.id === currentItem.id ? currentItem : item
+            );
+            alert(`SUCCESS: Item ${currentItem.name} updated.`);
+        }
         
         setMenuItems(updatedMenu);
         setIsModalOpen(false);
-        alert(`SUCCESS: Item ${currentItem.name} updated.`);
     };
 
     // MOCK DELETE function 
@@ -45,17 +77,16 @@ const MenuManagement = () => {
         }
     };
     
-    // MOCK ADD function (Simplified)
+    // MOCK ADD function
     const addItem = () => {
         const newItem = {
-            id: Date.now(), 
+            id: Date.now() * -1, // Negative ID marks it as NEW
             name: "New Custom Item",
             price: 1.00,
             category: "New Category",
             active: true,
-            inventory_link: ''
+            inventory_link: 'NEW_ITEM_INVENTORY_ID'
         };
-        // Open the modal with the new item data
         openEditModal(newItem); 
     };
 
@@ -100,13 +131,14 @@ const MenuManagement = () => {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name/Category</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {filteredItems.map((item) => (
                             <tr key={item.id} className="hover:bg-gray-100">
-                                <td className="px-6 py-4 whitespace-nowrap">{item.id}</td>
+                                <td className="px-6 py-4 whitespace-nowrap">{item.id > 0 ? item.id : 'NEW'}</td>
                                 <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
                                     {item.name} 
                                     <div className="text-xs text-gray-500">{item.category}</div>
@@ -115,6 +147,12 @@ const MenuManagement = () => {
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                         {item.active ? 'Active' : 'Disabled'}
+                                    </span>
+                                </td>
+                                {/* Stock Column */}
+                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                    <span className={`font-semibold ${getStockLevel(item.inventory_link) < 15 ? 'text-red-600' : 'text-green-600'}`}>
+                                        {getStockLevel(item.inventory_link)} units
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -142,7 +180,7 @@ const MenuManagement = () => {
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-2xl w-full max-w-lg">
                         <h3 className="text-2xl font-bold mb-4 border-b pb-2">
-                            Edit Item: {currentItem.name}
+                            {currentItem.id < 0 ? 'Add New Item' : `Edit Item: ${currentItem.name}`}
                         </h3>
                         
                         <div className="space-y-4">
@@ -220,7 +258,7 @@ const MenuManagement = () => {
                                 onClick={saveChanges}
                                 className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                             >
-                                Save Changes (Mock)
+                                {currentItem.id < 0 ? 'Create New Item (Mock)' : 'Save Changes (Mock)'}
                             </button>
                         </div>
                     </div>
