@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 // Layout Components
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
-// Page Components (We will create these next)
+// Page Components — CONFIRM these paths and names match your files exactly
 import Dashboard from './pages/Dashboard'; 
 import MenuManagement from './pages/MenuManagement';
 import UserManagement from './pages/UserManagement';
@@ -24,8 +24,8 @@ const App = () => {
               <Route path="/menu-management" element={<MenuManagement />} />
               <Route path="/user-management" element={<UserManagement />} />
               <Route path="/system-settings" element={<SystemSettings />} />
-              {/* You can add a placeholder for Inventory later if needed */}
-              <Route path="/inventory" element={<h2 className="text-2xl font-bold">Inventory Management (Coming Soon)</h2>} />
+              {/* Added fallback for Inventory route */}
+              <Route path="/inventory" element={<h2 className="text-2xl font-bold p-6">📦 Inventory Management (Coming Soon)</h2>} />
             </Routes>
           </main>
         </div>
