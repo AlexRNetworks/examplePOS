@@ -13,10 +13,24 @@ const Inventory = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentStockItem, setCurrentStockItem] = useState(null);
 
+    // --- CRUD FUNCTIONS ---
+
     // Opens the modal for editing stock
     const openEditModal = (item) => {
         setCurrentStockItem(item);
         setIsModalOpen(true);
+    };
+
+    // MOCK ADD function
+    const addNewItem = () => {
+        const newItem = {
+            id: Date.now() * -1, // Negative ID marks it as NEW
+            name: 'New Custom Ingredient',
+            currentStock: 0,
+            unit: 'units',
+            supplier: 'Unknown'
+        };
+        openEditModal(newItem);
     };
 
     // Handles input change in the modal
@@ -28,17 +42,29 @@ const Inventory = () => {
         }));
     };
 
-    // Saves the changes (Mock Update)
+    // Saves the changes (Mock Update/Add Logic)
     const saveChanges = () => {
         if (!currentStockItem) return;
 
-        const updatedInventory = inventory.map(item =>
-            item.id === currentStockItem.id ? currentStockItem : item
-        );
+        let updatedInventory;
+        const isNewItem = currentStockItem.id < 0;
+
+        if (isNewItem) {
+            // New Item Logic (ADD)
+            const permanentId = Math.floor(Math.random() * 1000) + 1000; 
+            const newItem = { ...currentStockItem, id: permanentId };
+            updatedInventory = [newItem, ...inventory]; // Add to the top
+            alert(`SUCCESS: NEW Item ${newItem.name} added to inventory.`);
+        } else {
+            // Existing Item Logic (UPDATE)
+            updatedInventory = inventory.map(item =>
+                item.id === currentStockItem.id ? currentStockItem : item
+            );
+            alert(`SUCCESS: Stock for ${currentStockItem.name} updated to ${currentStockItem.currentStock} ${currentStockItem.unit}.`);
+        }
         
         setInventory(updatedInventory);
         setIsModalOpen(false);
-        alert(`SUCCESS: Stock for ${currentStockItem.name} updated to ${currentStockItem.currentStock} ${currentStockItem.unit}.`);
     };
 
     return (
@@ -48,6 +74,13 @@ const Inventory = () => {
                 View and manually adjust stock levels for raw goods and supplies.
             </p>
             
+            <button 
+                onClick={addNewItem}
+                className="bg-green-600 text-white p-3 rounded-lg mb-6 hover:bg-green-700 transition-colors shadow-md"
+            >
+                ➕ Add New Stock Item
+            </button>
+
             <div className="bg-white p-4 rounded-lg shadow-lg overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
@@ -73,7 +106,7 @@ const Inventory = () => {
                                         onClick={() => openEditModal(item)}
                                         className="text-indigo-600 hover:text-indigo-900 mr-4"
                                     >
-                                        Adjust Stock
+                                        Adjust/Edit
                                     </button>
                                 </td>
                             </tr>
@@ -87,13 +120,49 @@ const Inventory = () => {
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-2xl w-full max-w-lg">
                         <h3 className="text-2xl font-bold mb-4 border-b pb-2">
-                            Adjust Stock: {currentStockItem.name}
+                            {currentStockItem.id < 0 ? 'Add New Stock Item' : `Adjust Stock: ${currentStockItem.name}`}
                         </h3>
                         
                         <div className="space-y-4">
+                            {/* Name Input (Visible for Add, but editable for Edit too) */}
+                            <label className="block">
+                                <span className="text-gray-700">Item Name</span>
+                                <input 
+                                    type="text" 
+                                    name="name" 
+                                    value={currentStockItem.name || ''} 
+                                    onChange={handleFormChange}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                                />
+                            </label>
+
+                            {/* Supplier Input */}
+                             <label className="block">
+                                <span className="text-gray-700">Supplier</span>
+                                <input 
+                                    type="text" 
+                                    name="supplier" 
+                                    value={currentStockItem.supplier || ''} 
+                                    onChange={handleFormChange}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                                />
+                            </label>
+
+                            {/* Unit Input */}
+                            <label className="block">
+                                <span className="text-gray-700">Unit of Measure (e.g., lbs, cuts, case)</span>
+                                <input 
+                                    type="text" 
+                                    name="unit" 
+                                    value={currentStockItem.unit || ''} 
+                                    onChange={handleFormChange}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                                />
+                            </label>
+
                             {/* Stock Input */}
                             <label className="block">
-                                <span className="text-gray-700">New Current Stock ({currentStockItem.unit})</span>
+                                <span className="text-gray-700">Current Stock Quantity ({currentStockItem.unit})</span>
                                 <input 
                                     type="number" 
                                     name="currentStock" 
@@ -102,19 +171,8 @@ const Inventory = () => {
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
                                     min="0"
                                 />
-                                <p className="text-sm text-gray-500 mt-1">Simulates receiving a new shipment or performing a stock count.</p>
                             </label>
                             
-                            {/* Supplier Read-only */}
-                             <label className="block">
-                                <span className="text-gray-700">Supplier (Read Only)</span>
-                                <input 
-                                    type="text" 
-                                    value={currentStockItem.supplier || ''} 
-                                    readOnly
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border bg-gray-100"
-                                />
-                            </label>
                         </div>
 
                         <div className="flex justify-end space-x-3 mt-6">
@@ -128,7 +186,7 @@ const Inventory = () => {
                                 onClick={saveChanges}
                                 className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                             >
-                                Update Stock (Mock)
+                                {currentStockItem.id < 0 ? 'Create New Item (Mock)' : 'Save Changes (Mock)'}
                             </button>
                         </div>
                     </div>
