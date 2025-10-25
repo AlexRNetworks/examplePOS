@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
 
-// Mock data representing inventory items (raw ingredients/supplies)
-const initialInventory = [
-    { id: 1, name: '8oz Beef Filet Cuts', currentStock: 12, unit: 'cuts', supplier: 'Premium Meats' },
-    { id: 2, name: 'Espresso Beans (lb)', currentStock: 40, unit: 'lbs', supplier: 'Local Roasters' },
-    { id: 3, name: 'Heirloom Tomatoes', currentStock: 25, unit: 'units', supplier: 'Farm Fresh' },
-    { id: 4, name: 'Disposable Napkins', currentStock: 1500, unit: 'units', supplier: 'Paper Supply Co' },
-];
+// NOTE: initialInventory array was moved to App.jsx
 
-const Inventory = () => {
-    const [inventory, setInventory] = useState(initialInventory);
+const Inventory = ({ inventory, setInventory }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentStockItem, setCurrentStockItem] = useState(null);
 
@@ -63,7 +56,7 @@ const Inventory = () => {
             alert(`SUCCESS: Stock for ${currentStockItem.name} updated to ${currentStockItem.currentStock} ${currentStockItem.unit}.`);
         }
         
-        setInventory(updatedInventory);
+        setInventory(updatedInventory); // Use the global setter
         setIsModalOpen(false);
     };
 
@@ -124,7 +117,7 @@ const Inventory = () => {
                         </h3>
                         
                         <div className="space-y-4">
-                            {/* Name Input (Visible for Add, but editable for Edit too) */}
+                            {/* Name Input */}
                             <label className="block">
                                 <span className="text-gray-700">Item Name</span>
                                 <input 
