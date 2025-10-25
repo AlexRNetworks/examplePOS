@@ -21,17 +21,29 @@ const UserManagement = () => {
         }));
     };
 
-    // Saves the changes (Mock Update)
+    // Saves the changes (Mock Update/Add Logic)
     const saveChanges = () => {
         if (!currentUser) return;
+        
+        let updatedUsers;
 
-        const updatedUsers = users.map(user =>
-            user.id === currentUser.id ? currentUser : user
-        );
+        // Check if the user ID is negative (Our sign for a NEW user)
+        if (currentUser.id < 0) {
+            // New User Logic (ADD)
+            const permanentId = Math.floor(Math.random() * 1000) + 500; 
+            const newUser = { ...currentUser, id: permanentId };
+            updatedUsers = [newUser, ...users]; // Add to the top
+            alert(`SUCCESS: NEW User ${newUser.name} added with ID ${permanentId}.`);
+        } else {
+            // Existing User Logic (UPDATE)
+            updatedUsers = users.map(user =>
+                user.id === currentUser.id ? currentUser : user
+            );
+            alert(`SUCCESS: User ${currentUser.name}'s details (Role: ${currentUser.role}) have been updated.`);
+        }
         
         setUsers(updatedUsers);
         setIsModalOpen(false);
-        alert(`SUCCESS: User ${currentUser.name}'s details (Role: ${currentUser.role}) have been updated.`);
     };
     
     // MOCK DELETE function (Simulates database removal)
@@ -46,7 +58,7 @@ const UserManagement = () => {
     // MOCK ADD function
     const addUser = () => {
         const newUser = {
-            id: Date.now(), 
+            id: Date.now() * -1, // Negative ID marks it as NEW
             name: "New Employee",
             role: "Server",
             pin: "0000",
@@ -107,7 +119,7 @@ const UserManagement = () => {
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-2xl w-full max-w-lg">
                         <h3 className="text-2xl font-bold mb-4 border-b pb-2">
-                            Edit User: {currentUser.name}
+                            {currentUser.id < 0 ? 'Add New Employee' : `Edit User: ${currentUser.name}`}
                         </h3>
                         
                         <div className="space-y-4">
@@ -143,7 +155,7 @@ const UserManagement = () => {
                              <label className="block">
                                 <span className="text-gray-700">POS PIN (Simulated Reset)</span>
                                 <input 
-                                    type="password" // Use password to hide the PIN
+                                    type="password" 
                                     name="pin" 
                                     value={currentUser.pin || ''} 
                                     onChange={handleFormChange}
@@ -165,7 +177,7 @@ const UserManagement = () => {
                                 onClick={saveChanges}
                                 className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                             >
-                                Save Changes (Mock)
+                                {currentUser.id < 0 ? 'Create New Employee (Mock)' : 'Save Changes (Mock)'}
                             </button>
                         </div>
                     </div>
