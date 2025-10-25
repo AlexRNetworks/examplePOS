@@ -2,58 +2,115 @@ import React, { useState } from 'react';
 import mockMenuData from '../data/mockMenu.json'; 
 
 const MenuManagement = () => {
-    // Initialize state with the mock data to enable mock CRUD operations
     const [menuItems, setMenuItems] = useState(mockMenuData);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentItem, setCurrentItem] = useState(null); // Item currently being edited
+    const [filterCategory, setFilterCategory] = useState('All');
 
-    // MOCK DELETE function (Simulates database removal)
+    // --- MOCK CRUD OPERATIONS ---
+
+    // Opens the modal and loads the item data
+    const openEditModal = (item) => {
+        setCurrentItem(item);
+        setIsModalOpen(true);
+    };
+
+    // Handles form input changes within the modal
+    const handleFormChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setCurrentItem(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : (name === 'price' ? parseFloat(value) : value),
+        }));
+    };
+
+    // Saves the changes (Mock Update)
+    const saveChanges = () => {
+        if (!currentItem) return;
+
+        const updatedMenu = menuItems.map(item =>
+            item.id === currentItem.id ? currentItem : item
+        );
+        
+        setMenuItems(updatedMenu);
+        setIsModalOpen(false);
+        alert(`SUCCESS: Item ${currentItem.name} updated.`);
+    };
+
+    // MOCK DELETE function 
     const deleteItem = (id) => {
-        if (window.confirm(`Are you sure you want to delete item ID ${id}? (Simulated Action)`)) {
+        if (window.confirm(`Are you sure you want to permanently disable item ID ${id}? (Simulated Action)`)) {
             const updatedMenu = menuItems.filter(item => item.id !== id);
             setMenuItems(updatedMenu);
         }
     };
     
-    // MOCK ADD function (Simulates database insertion)
+    // MOCK ADD function (Simplified)
     const addItem = () => {
         const newItem = {
-            id: Date.now(), // Unique ID
-            name: "New Promo Item",
-            price: 5.99,
-            category: "Seasonal",
-            active: true
+            id: Date.now(), 
+            name: "New Custom Item",
+            price: 1.00,
+            category: "New Category",
+            active: true,
+            inventory_link: ''
         };
-        setMenuItems([...menuItems, newItem]);
+        // Open the modal with the new item data
+        openEditModal(newItem); 
     };
+
+    // Filter Logic
+    const filteredItems = menuItems.filter(item => 
+        filterCategory === 'All' || item.category === filterCategory
+    );
     
+    // Get unique categories for the filter dropdown
+    const categories = ['All', ...new Set(mockMenuData.map(item => item.category))];
+
     return (
         <div className="p-6">
             <h2 className="text-3xl font-bold text-gray-800 mb-6">Menu Item Management</h2>
             
-            <button 
-                onClick={addItem} 
-                className="bg-green-600 text-white p-3 rounded-lg mb-6 hover:bg-green-700 transition-colors shadow-md"
-            >
-                ➕ Simulate Add New Item
-            </button>
+            <div className="flex justify-between items-center mb-6">
+                <button 
+                    onClick={addItem} 
+                    className="bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition-colors shadow-md"
+                >
+                    ➕ Add New Menu Item
+                </button>
+                
+                {/* Category Filter */}
+                <select 
+                    value={filterCategory} 
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    className="p-2 border border-gray-300 rounded-lg shadow-sm"
+                >
+                    {categories.map(cat => (
+                        <option key={cat} value={cat}>{cat} ({menuItems.filter(item => cat === 'All' || item.category === cat).length})</option>
+                    ))}
+                </select>
+            </div>
             
+            {/* Menu Item Table */}
             <div className="bg-white p-4 rounded-lg shadow-lg overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name/Category</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {menuItems.map((item) => (
+                        {filteredItems.map((item) => (
                             <tr key={item.id} className="hover:bg-gray-100">
                                 <td className="px-6 py-4 whitespace-nowrap">{item.id}</td>
-                                <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{item.name}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.category}</td>
+                                <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                                    {item.name} 
+                                    <div className="text-xs text-gray-500">{item.category}</div>
+                                </td>
                                 <td className="px-6 py-4 whitespace-nowrap font-mono">${item.price.toFixed(2)}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
@@ -61,14 +118,114 @@ const MenuManagement = () => {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <button className="text-indigo-600 hover:text-indigo-900 mr-4">Edit</button>
-                                    <button onClick={() => deleteItem(item.id)} className="text-red-600 hover:text-red-900">Delete (Mock)</button>
+                                    <button 
+                                        onClick={() => openEditModal(item)}
+                                        className="text-indigo-600 hover:text-indigo-900 mr-4"
+                                    >
+                                        Edit Details
+                                    </button>
+                                    <button 
+                                        onClick={() => deleteItem(item.id)} 
+                                        className="text-red-600 hover:text-red-900"
+                                    >
+                                        Delete (Mock)
+                                    </button>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
+            
+            {/* --- EDIT MODAL COMPONENT --- */}
+            {isModalOpen && currentItem && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-2xl w-full max-w-lg">
+                        <h3 className="text-2xl font-bold mb-4 border-b pb-2">
+                            Edit Item: {currentItem.name}
+                        </h3>
+                        
+                        <div className="space-y-4">
+                            {/* Name Input */}
+                            <label className="block">
+                                <span className="text-gray-700">Item Name</span>
+                                <input 
+                                    type="text" 
+                                    name="name" 
+                                    value={currentItem.name || ''} 
+                                    onChange={handleFormChange}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                                />
+                            </label>
+
+                            {/* Price Input */}
+                            <label className="block">
+                                <span className="text-gray-700">Price ($)</span>
+                                <input 
+                                    type="number" 
+                                    name="price" 
+                                    value={currentItem.price || 0} 
+                                    onChange={handleFormChange}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                                    step="0.01"
+                                />
+                            </label>
+
+                            {/* Category Input */}
+                             <label className="block">
+                                <span className="text-gray-700">Category</span>
+                                <input 
+                                    type="text" 
+                                    name="category" 
+                                    value={currentItem.category || ''} 
+                                    onChange={handleFormChange}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                                />
+                            </label>
+                            
+                            {/* Active Checkbox */}
+                            <label className="flex items-center space-x-3">
+                                <input 
+                                    type="checkbox" 
+                                    name="active" 
+                                    checked={currentItem.active || false} 
+                                    onChange={handleFormChange}
+                                    className="rounded text-green-600" 
+                                />
+                                <span className="text-gray-700 font-medium">Item Active on POS</span>
+                            </label>
+                            
+                            {/* Inventory Link Field */}
+                            <label className="block">
+                                <span className="text-gray-700">Inventory Link ID</span>
+                                <input 
+                                    type="text" 
+                                    name="inventory_link" 
+                                    value={currentItem.inventory_link || ''} 
+                                    onChange={handleFormChange}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border bg-gray-50"
+                                    placeholder="e.g., steak_8oz_cut"
+                                />
+                            </label>
+                        </div>
+
+                        <div className="flex justify-end space-x-3 mt-6">
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={saveChanges}
+                                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                            >
+                                Save Changes (Mock)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
