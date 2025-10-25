@@ -10,12 +10,13 @@ import UserManagement from './pages/UserManagement';
 import SystemSettings from './pages/SystemSettings';
 import Inventory from './pages/Inventory'; 
 
-// --- GLOBAL MOCK INVENTORY DATA (Moved from Inventory.jsx) ---
+// --- GLOBAL MOCK INVENTORY DATA ---
 const initialInventory = [
-    { id: 1, name: '8oz Beef Filet Cuts', currentStock: 12, unit: 'cuts', supplier: 'Premium Meats' },
-    { id: 2, name: 'Espresso Beans (lb)', currentStock: 40, unit: 'lbs', supplier: 'Local Roasters' },
-    { id: 3, name: 'Heirloom Tomatoes', currentStock: 25, unit: 'units', supplier: 'Farm Fresh' },
-    { id: 4, name: 'Disposable Napkins', currentStock: 1500, unit: 'units', supplier: 'Paper Supply Co' },
+    // Added consumptionRate. Disposable Napkins is 'On Hold' (rate: 0)
+    { id: 1, name: '8oz Beef Filet Cuts', currentStock: 12, unit: 'cuts', supplier: 'Premium Meats', consumptionRate: 5 },
+    { id: 2, name: 'Espresso Beans (lb)', currentStock: 40, unit: 'lbs', supplier: 'Local Roasters', consumptionRate: 10 },
+    { id: 3, name: 'Heirloom Tomatoes', currentStock: 25, unit: 'units', supplier: 'Farm Fresh', consumptionRate: 7 },
+    { id: 4, name: 'Disposable Napkins', currentStock: 1500, unit: 'units', supplier: 'Paper Supply Co', consumptionRate: 0 },
 ];
 // ----------------------------------------------------------------
 
@@ -25,15 +26,10 @@ const App = () => {
     
     // --- STOCK CONSUMPTION LOGIC ---
     const simulateDailyConsumption = () => {
-        const consumptionRates = {
-            '8oz Beef Filet Cuts': 5, // Uses 5 cuts per day
-            'Espresso Beans (lb)': 10, // Uses 10 lbs per day
-            'Heirloom Tomatoes': 7, // Uses 7 units per day
-            'Disposable Napkins': 300, // Uses 300 units per day
-        };
-
+        
         const updatedInventory = inventory.map(item => {
-            const consumed = consumptionRates[item.name] || 0;
+            // Read consumption rate directly from the item, defaulting to 0
+            const consumed = item.consumptionRate || 0;
             
             // Calculate new stock, ensuring it doesn't go below zero
             const newStock = Math.max(0, item.currentStock - consumed);
