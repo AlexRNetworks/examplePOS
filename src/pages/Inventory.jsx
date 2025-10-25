@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 
-// NOTE: initialInventory array was moved to App.jsx
-
 const Inventory = ({ inventory, setInventory }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentStockItem, setCurrentStockItem] = useState(null);
@@ -21,7 +19,8 @@ const Inventory = ({ inventory, setInventory }) => {
             name: 'New Custom Ingredient',
             currentStock: 0,
             unit: 'units',
-            supplier: 'Unknown'
+            supplier: 'Unknown',
+            consumptionRate: 0, // <-- Default new items to 0 (On Hold)
         };
         openEditModal(newItem);
     };
@@ -31,7 +30,8 @@ const Inventory = ({ inventory, setInventory }) => {
         const { name, value } = e.target;
         setCurrentStockItem(prev => ({
             ...prev,
-            [name]: name === 'currentStock' ? parseInt(value) || 0 : value,
+            // Parse numbers for stock and rate fields
+            [name]: (name === 'currentStock' || name === 'consumptionRate') ? parseInt(value) || 0 : value,
         }));
     };
 
@@ -47,7 +47,7 @@ const Inventory = ({ inventory, setInventory }) => {
             const permanentId = Math.floor(Math.random() * 1000) + 1000; 
             const newItem = { ...currentStockItem, id: permanentId };
             updatedInventory = [newItem, ...inventory]; // Add to the top
-            alert(`SUCCESS: NEW Item ${newItem.name} added to inventory.`);
+            alert(`SUCCESS: NEW Item ${newItem.name} added to inventory. Consumption set to ${newItem.consumptionRate}.`);
         } else {
             // Existing Item Logic (UPDATE)
             updatedInventory = inventory.map(item =>
@@ -80,6 +80,7 @@ const Inventory = ({ inventory, setInventory }) => {
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Stock</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Daily Rate</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -91,6 +92,11 @@ const Inventory = ({ inventory, setInventory }) => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                                     <span className={`font-bold ${item.currentStock < 15 ? 'text-red-600' : 'text-green-600'}`}>
                                         {item.currentStock} {item.unit}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                    <span className={`font-medium ${item.consumptionRate === 0 ? 'text-gray-500' : 'text-blue-600'}`}>
+                                        {item.consumptionRate === 0 ? 'On Hold' : `${item.consumptionRate} / day`}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.supplier}</td>
@@ -153,7 +159,7 @@ const Inventory = ({ inventory, setInventory }) => {
                                 />
                             </label>
 
-                            {/* Stock Input */}
+                            {/* Stock Input (Current Stock) */}
                             <label className="block">
                                 <span className="text-gray-700">Current Stock Quantity ({currentStockItem.unit})</span>
                                 <input 
@@ -164,6 +170,20 @@ const Inventory = ({ inventory, setInventory }) => {
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
                                     min="0"
                                 />
+                            </label>
+                            
+                            {/* Daily Consumption Rate Input */}
+                            <label className="block">
+                                <span className="text-gray-700 font-bold">Daily Consumption Rate ({currentStockItem.unit} / Day)</span>
+                                <input 
+                                    type="number" 
+                                    name="consumptionRate" 
+                                    value={currentStockItem.consumptionRate || 0} 
+                                    onChange={handleFormChange}
+                                    className="mt-1 block w-full rounded-md border-yellow-500 shadow-sm p-2 border bg-yellow-50"
+                                    min="0"
+                                />
+                                <p className="text-sm text-gray-500 mt-1">Set rate to **0** to put this item **On Hold** (it will not be consumed in the simulation).</p>
                             </label>
                             
                         </div>
