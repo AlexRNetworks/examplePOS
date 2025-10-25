@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant POS System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Navigation Bar */
+        .nav-bar {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-bar h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: #34495e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #415a77;
+        }
+
+        .nav-btn.active {
+            background: #3498db;
+        }
+
+        /* Main Content Area */
+        .content {
+            height: calc(100vh - 64px);
+            overflow: auto;
+        }
+
+        .view {
+            display: none;
+            height: 100%;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Server View Styles */
+        #server-view {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            height: 100%;
+            gap: 0;
+        }
+
+        .menu-section {
+            background: white;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 2px solid #ddd;
+        }
+
+        .menu-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .menu-header h2 {
+            color: #2c3e50;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .table-input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .table-input-group input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .menu-category {
+            margin-bottom: 30px;
+        }
+
+        .category-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #ecf0f1;
+            border-radius: 5px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .menu-item {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .menu-item:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .menu-item.custom {
+            background: #e74c3c;
+        }
+
+        .menu-item.custom:hover {
+            background: #c0392b;
+        }
+
+        .menu-item-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .menu-item-price {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Order Panel */
+        .order-panel {
+            background: #34495e;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .order-header {
+            padding: 20px;
+            background: #2c3e50;
+            border-bottom: 2px solid #1a252f;
+        }
+
+        .order-header h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .order-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #bdc3c7;
+        }
+
+        .order-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .order-item {
+            background: #2c3e50;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .order-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .order-item-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .order-item-price {
+            font-size: 16px;
+            color: #2ecc71;
+        }
+
+        .order-item-mods {
+            font-size: 13px;
+            color: #95a5a6;
+            margin: 5px 0;
+            padding-left: 10px;
+        }
+
+        .order-item-notes {
+            font-size: 13px;
+            color: #f39c12;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .remove-btn:hover {
+            background: #c0392b;
+        }
+
+        .order-footer {
+            padding: 20px;
+            background: #2c3e50;
+            border-top: 2px solid #1a252f;
+        }
+
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #34495e;
+        }
+
+        .order-total-amount {
+            color: #2ecc71;
+        }
+
+        .order-actions {
+            display: grid;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .submit-btn {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            background: #27ae60;
+        }
+
+        .clear-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .clear-btn:hover {
+            background: #c0392b;
+        }
+
+        /* Kitchen View Styles */
+        #kitchen-view {
+            padding: 20px;
+            background: #ecf0f1;
+        }
+
+        .kitchen-header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .kitchen-header h2 {
+            color: #2c3e50;
+            font-size: 24px;
+        }
+
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .kitchen-order {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+        }
+
+        .kitchen-order.preparing {
+            border-left-color: #f39c12;
+        }
+
+        .kitchen-order.ready {
+            border-left-color: #2ecc71;
+        }
+
+        .kitchen-order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .order-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .order-time {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .kitchen-items {
+            margin-bottom: 15px;
+        }
+
+        .kitchen-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .kitchen-item-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .kitchen-status-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .status-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .status-btn.start {
+            background: #f39c12;
+            color: white;
+        }
+
+        .status-btn.start:hover {
+            background: #e67e22;
+        }
+
+        .status-btn.complete {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .status-btn.complete:hover {
+            background: #27ae60;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        /* Modal for Custom Pizza */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 22px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modifier-section {
+            margin-bottom: 25px;
+        }
+
+        .modifier-section h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .modifier-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .modifier-btn {
+            padding: 12px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .modifier-btn:hover {
+            border-color: #3498db;
+        }
+
+        .modifier-btn.selected {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .notes-section {
+            margin-top: 20px;
+        }
+
+        .notes-section label {
+            display: block;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .notes-section textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 0 0 8px 8px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-footer button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .cancel-btn:hover {
+            background: #7f8c8d;
+        }
+
+        .add-to-order-btn {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .add-to-order-btn:hover {
+            background: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="nav-bar">
+        <h1>🍕 Restaurant POS System</h1>
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="switchView('server')">Server View</button>
+            <button class="nav-btn" onclick="switchView('kitchen')">Kitchen Display</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <!-- Server View -->
+        <div id="server-view" class="view active">
+            <div class="menu-section">
+                <div class="menu-header">
+                    <h2>Menu</h2>
+                    <div class="table-input-group">
+                        <input type="text" id="tableNumber" placeholder="Table #" />
+                        <input type="text" id="ticketName" placeholder="Ticket Name (optional)" />
+                    </div>
+                </div>
+
+                <div class="menu-category">
+                    <div class="category-title">Specialty Pizzas</div>
+                    <div class="menu-grid" id="pizzaMenu"></div>
+                </div>
+
+                <div class="menu-category">
+                    <div class="category-title">Build Your Own</div>
+                    <div class="menu-grid">
+                        <button class="menu-item custom" onclick="openCustomPizza()">
+                            <div class="menu-item-name">Custom Pizza</div>
+                            <div class="menu-item-price">Starting at $12.99</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="order-panel">
+                <div class="order-header">
+                    <h3>Current Order</h3>
+                    <div class="order-info">
+                        <span id="orderTableInfo">No table selected</span>
+                        <span id="orderTime"></span>
+                    </div>
+                </div>
+                <div class="order-items" id="orderItems">
+                    <div class="empty-state">
+                        <p>No items added yet</p>
+                    </div>
+                </div>
+                <div class="order-footer">
+                    <div class="order-total">
+                        <span>Total:</span>
+                        <span class="order-total-amount" id="orderTotal">$0.00</span>
+                    </div>
+                    <div class="order-actions">
+                        <button class="action-btn submit-btn" onclick="submitOrder()">Submit to Kitchen</button>
+                        <button class="action-btn clear-btn" onclick="clearOrder()">Clear Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kitchen View -->
+        <div id="kitchen-view" class="view">
+            <div class="kitchen-header">
+                <h2>Kitchen Display System</h2>
+            </div>
+            <div class="orders-grid" id="kitchenOrders">
+                <div class="empty-state">
+                    <h3>No Orders</h3>
+                    <p>Waiting for orders from servers...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Pizza Modal -->
+    <div class="modal" id="customPizzaModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Build Custom Pizza</h3>
+                <button class="close-modal" onclick="closeCustomPizza()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modifier-section">
+                    <h4>Size</h4>
+                    <div class="modifier-grid" id="sizeOptions"></div>
+                </div>
+                <div class="modifier-section">
+                    <h4>Crust</h4>
+                    <div class="modifier-grid" id="crustOptions"></div>
+                </div>
+                <div class="modifier-section">
+                    <h4>Sauce</h4>
+                    <div class="modifier-grid" id="sauceOptions"></div>
+                </div>
+                <div class="modifier-section">
+                    <h4>Toppings ($1.50 each)</h4>
+                    <div class="modifier-grid" id="toppingOptions"></div>
+                </div>
+                <div class="notes-section">
+                    <label>Special Instructions</label>
+                    <textarea id="customPizzaNotes" placeholder="Any special requests..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeCustomPizza()">Cancel</button>
+                <button class="add-to-order-btn" onclick="addCustomPizza()">Add to Order - <span id="customPizzaPrice">$12.99</span></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global State
+        let currentOrder = [];
+        let kitchenOrders = [];
+        let orderIdCounter = 1;
+
+        // Menu Data
+        const pizzas = [
+            { id: 1, name: "Margherita", price: 14.99, description: "Fresh mozzarella, basil, tomato sauce" },
+            { id: 2, name: "Pepperoni Classic", price: 15.99, description: "Pepperoni, mozzarella, tomato sauce" },
+            { id: 3, name: "Supreme", price: 18.99, description: "Pepperoni, sausage, peppers, onions, mushrooms" },
+            { id: 4, name: "BBQ Chicken", price: 17.99, description: "Grilled chicken, BBQ sauce, red onions, cilantro" },
+            { id: 5, name: "Hawaiian", price: 16.99, description: "Ham, pineapple, mozzarella" },
+            { id: 6, name: "Meat Lovers", price: 19.99, description: "Pepperoni, sausage, bacon, ham, beef" },
+            { id: 7, name: "Veggie Deluxe", price: 16.99, description: "Mushrooms, peppers, onions, olives, tomatoes" },
+            { id: 8, name: "White Pizza", price: 16.99, description: "Ricotta, mozzarella, garlic, olive oil" },
+            { id: 9, name: "Buffalo Chicken", price: 17.99, description: "Spicy chicken, buffalo sauce, ranch drizzle" },
+            { id: 10, name: "Mediterranean", price: 18.99, description: "Feta, olives, tomatoes, spinach, red onion" }
+        ];
+
+        const customPizzaOptions = {
+            sizes: [
+                { name: "Small 10\"", price: 10.99 },
+                { name: "Medium 12\"", price: 12.99 },
+                { name: "Large 14\"", price: 14.99 },
+                { name: "XL 16\"", price: 17.99 }
+            ],
+            crusts: [
+                { name: "Regular" },
+                { name: "Thin" },
+                { name: "Thick" },
+                { name: "Stuffed (+$2)", price: 2.00 }
+            ],
+            sauces: [
+                { name: "Tomato" },
+                { name: "White" },
+                { name: "BBQ" },
+                { name: "Buffalo" },
+                { name: "Pesto" }
+            ],
+            toppings: [
+                "Pepperoni", "Sausage", "Bacon", "Ham", "Chicken",
+                "Mushrooms", "Peppers", "Onions", "Olives", "Tomatoes",
+                "Pineapple", "Jalapeños", "Spinach", "Feta", "Ricotta"
+            ]
+        };
+
+        let customPizzaSelection = {
+            size: customPizzaOptions.sizes[1],
+            crust: customPizzaOptions.crusts[0],
+            sauce: customPizzaOptions.sauces[0],
+            toppings: [],
+            notes: ""
+        };
+
+        // Initialize
+        function init() {
+            renderPizzaMenu();
+            renderCustomPizzaOptions();
+            updateOrderDisplay();
+            updateKitchenDisplay();
+            startClock();
+        }
+
+        function renderPizzaMenu() {
+            const container = document.getElementById('pizzaMenu');
+            container.innerHTML = pizzas.map(pizza => `
+                <button class="menu-item" onclick="addPizzaToOrder(${pizza.id})">
+                    <div class="menu-item-name">${pizza.name}</div>
+                    <div class="menu-item-price">$${pizza.price.toFixed(2)}</div>
+                </button>
+            `).join('');
+        }
+
+        function renderCustomPizzaOptions() {
+            // Sizes
+            document.getElementById('sizeOptions').innerHTML = customPizzaOptions.sizes.map((size, i) => `
+                <button class="modifier-btn ${i === 1 ? 'selected' : ''}" onclick="selectSize(${i})">
+                    ${size.name}
+                </button>
+            `).join('');
+
+            // Crusts
+            document.getElementById('crustOptions').innerHTML = customPizzaOptions.crusts.map((crust, i) => `
+                <button class="modifier-btn ${i === 0 ? 'selected' : ''}" onclick="selectCrust(${i})">
+                    ${crust.name}
+                </button>
+            `).join('');
+
+            // Sauces
+            document.getElementById('sauceOptions').innerHTML = customPizzaOptions.sauces.map((sauce, i) => `
+                <button class="modifier-btn ${i === 0 ? 'selected' : ''}" onclick="selectSauce(${i})">
+                    ${sauce.name}
+                </button>
+            `).join('');
+
+            // Toppings
+            document.getElementById('toppingOptions').innerHTML = customPizzaOptions.toppings.map((topping, i) => `
+                <button class="modifier-btn" onclick="toggleTopping(${i})">
+                    ${topping}
+                </button>
+            `).join('');
+        }
+
+        function addPizzaToOrder(pizzaId) {
+            const pizza = pizzas.find(p => p.id === pizzaId);
+            const orderItem = {
+                id: Date.now(),
+                name: pizza.name,
+                price: pizza.price,
+                modifiers: [],
+                notes: ""
+            };
+            currentOrder.push(orderItem);
+            updateOrderDisplay();
+        }
+
+        function openCustomPizza() {
+            customPizzaSelection = {
+                size: customPizzaOptions.sizes[1],
+                crust: customPizzaOptions.crusts[0],
+                sauce: customPizzaOptions.sauces[0],
+                toppings: [],
+                notes: ""
+            };
+            document.getElementById('customPizzaModal').classList.add('active');
+            renderCustomPizzaOptions();
+            updateCustomPizzaPrice();
+        }
+
+        function closeCustomPizza() {
+            document.getElementById('customPizzaModal').classList.remove('active');
+        }
+
+        function selectSize(index) {
+            customPizzaSelection.size = customPizzaOptions.sizes[index];
+            document.querySelectorAll('#sizeOptions .modifier-btn').forEach((btn, i) => {
+                btn.classList.toggle('selected', i === index);
+            });
+            updateCustomPizzaPrice();
+        }
+
+        function selectCrust(index) {
+            customPizzaSelection.crust = customPizzaOptions.crusts[index];
+            document.querySelectorAll('#crustOptions .modifier-btn').forEach((btn, i) => {
+                btn.classList.toggle('selected', i === index);
+            });
+            updateCustomPizzaPrice();
+        }
+
+        function selectSauce(index) {
+            customPizzaSelection.sauce = customPizzaOptions.sauces[index];
+            document.querySelectorAll('#sauceOptions .modifier-btn').forEach((btn, i) => {
+                btn.classList.toggle('selected', i === index);
+            });
+        }
+
+        function toggleTopping(index) {
+            const topping = customPizzaOptions.toppings[index];
+            const toppingIndex = customPizzaSelection.toppings.indexOf(topping);
+            const btn = document.querySelectorAll('#toppingOptions .modifier-btn')[index];
+            
+            if (toppingIndex > -1) {
+                customPizzaSelection.toppings.splice(toppingIndex, 1);
+                btn.classList.remove('selected');
+            } else {
+                customPizzaSelection.toppings.push(topping);
+                btn.classList.add('selected');
+            }
+            updateCustomPizzaPrice();
+        }
+
+        function updateCustomPizzaPrice() {
+            let price = customPizzaSelection.size.price;
+            if (customPizzaSelection.crust.price) {
+                price += customPizzaSelection.crust.price;
+            }
+            price += customPizzaSelection.toppings.length * 1.50;
+            document.getElementById('customPizzaPrice').textContent = `$${price.toFixed(2)}`;
+        }
+
+        function addCustomPizza() {
+            const notes = document.getElementById('customPizzaNotes').value;
+            let price = customPizzaSelection.size.price;
+            if (customPizzaSelection.crust.price) {
+                price += customPizzaSelection.crust.price;
+            }
+            price += customPizzaSelection.toppings.length * 1.50;
+
+            const modifiers = [
+                customPizzaSelection.size.name,
+                customPizzaSelection.crust.name + " Crust",
+                customPizzaSelection.sauce.name + " Sauce",
+                ...customPizzaSelection.toppings
+            ];
+
+            const orderItem = {
+                id: Date.now(),
+                name: "Custom Pizza",
+                price: price,
+                modifiers: modifiers,
+                notes: notes
+            };
+
+            currentOrder.push(orderItem);
+            updateOrderDisplay();
+            closeCustomPizza();
+        }
+
+        function removeFromOrder(itemId) {
+            currentOrder = currentOrder.filter(item => item.id !== itemId);
+            updateOrderDisplay();
+        }
+
+        function updateOrderDisplay() {
+            const container = document.getElementById('orderItems');
+            const totalEl = document.getElementById('orderTotal');
+
+            if (currentOrder.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No items added yet</p></div>';
+                totalEl.textContent = '$0.00';
+                return;
+            }
+
+            const total = currentOrder.reduce((sum, item) => sum + item.price, 0);
+            totalEl.textContent = `$${total.toFixed(2)}`;
+
+            container.innerHTML = currentOrder.map(item => `
+                <div class="order-item">
+                    <div class="order-item-header">
+                        <span class="order-item-name">${item.name}</span>
+                        <span class="order-item-price">$${item.price.toFixed(2)}</span>
+                    </div>
+                    ${item.modifiers.length > 0 ? `
+                        <div class="order-item-mods">+ ${item.modifiers.join(', ')}</div>
+                    ` : ''}
+                    ${item.notes ? `<div class="order-item-notes">Note: ${item.notes}</div>` : ''}
+                    <button class="remove-btn" onclick="removeFromOrder(${item.id})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function submitOrder() {
+            if (currentOrder.length === 0) {
+                alert('Please add items to the order first');
+                return;
+            }
+
+            const tableNumber = document.getElementById('tableNumber').value;
+            if (!tableNumber) {
+                alert('Please enter a table number');
+                return;
+            }
+
+            const ticketName = document.getElementById('ticketName').value;
+            const order = {
+                id: orderIdCounter++,
+                tableNumber: tableNumber,
+                ticketName: ticketName,
+                items: [...currentOrder],
+                total: currentOrder.reduce((sum, item) => sum + item.price, 0),
+                status: 'new',
+                submittedAt: new Date(),
+                startedAt: null,
+                completedAt: null
+            };
+
+            kitchenOrders.push(order);
+            currentOrder = [];
+            document.getElementById('tableNumber').value = '';
+            document.getElementById('ticketName').value = '';
+            updateOrderDisplay();
+            updateKitchenDisplay();
+            alert(`Order #${order.id} submitted to kitchen!`);
+        }
+
+        function clearOrder() {
+            if (currentOrder.length === 0) return;
+            if (confirm('Clear all items from current order?')) {
+                currentOrder = [];
+                updateOrderDisplay();
+            }
+        }
+
+        function switchView(view) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            
+            if (view === 'server') {
+                document.getElementById('server-view').classList.add('active');
+                document.querySelectorAll('.nav-btn')[0].classList.add('active');
+            } else if (view === 'kitchen') {
+                document.getElementById('kitchen-view').classList.add('active');
+                document.querySelectorAll('.nav-btn')[1].classList.add('active');
+                updateKitchenDisplay();
+            }
+        }
+
+        function updateKitchenDisplay() {
+            const container = document.getElementById('kitchenOrders');
+            
+            if (kitchenOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No Orders</h3>
+                        <p>Waiting for orders from servers...</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = kitchenOrders.map(order => {
+                const timeSinceSubmit = Math.floor((new Date() - order.submittedAt) / 1000 / 60);
+                return `
+                    <div class="kitchen-order ${order.status}">
+                        <div class="kitchen-order-header">
+                            <div>
+                                <div class="order-number">Order #${order.id}</div>
+                                <div style="color: #7f8c8d; font-size: 14px; margin-top: 5px;">
+                                    Table ${order.tableNumber}${order.ticketName ? ` - ${order.ticketName}` : ''}
+                                </div>
+                            </div>
+                            <div class="order-time">
+                                ${timeSinceSubmit}m ago
+                                <div style="font-size: 12px; margin-top: 3px;">
+                                    ${order.status === 'new' ? '🔵 New' : order.status === 'preparing' ? '🟠 Preparing' : '🟢 Ready'}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="kitchen-items">
+                            ${order.items.map(item => `
+                                <div class="kitchen-item">
+                                    <div class="kitchen-item-name">${item.name}</div>
+                                    ${item.modifiers.length > 0 ? `
+                                        <div style="font-size: 13px; color: #7f8c8d; margin-top: 5px;">
+                                            ${item.modifiers.join(', ')}
+                                        </div>
+                                    ` : ''}
+                                    ${item.notes ? `
+                                        <div style="font-size: 13px; color: #e67e22; margin-top: 5px; font-weight: 600;">
+                                            ⚠️ ${item.notes}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="kitchen-status-btns">
+                            ${order.status === 'new' ? `
+                                <button class="status-btn start" onclick="startOrder(${order.id})">
+                                    Start Preparing
+                                </button>
+                            ` : order.status === 'preparing' ? `
+                                <button class="status-btn complete" onclick="completeOrder(${order.id})">
+                                    Mark Ready
+                                </button>
+                            ` : `
+                                <button class="status-btn" style="background: #95a5a6; color: white;" onclick="removeOrder(${order.id})">
+                                    Clear Order
+                                </button>
+                            `}
+                            ${order.status !== 'ready' ? `
+                                <button class="status-btn" style="background: #e74c3c; color: white;" onclick="removeOrder(${order.id})">
+                                    Cancel
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function startOrder(orderId) {
+            const order = kitchenOrders.find(o => o.id === orderId);
+            if (order) {
+                order.status = 'preparing';
+                order.startedAt = new Date();
+                updateKitchenDisplay();
+            }
+        }
+
+        function completeOrder(orderId) {
+            const order = kitchenOrders.find(o => o.id === orderId);
+            if (order) {
+                order.status = 'ready';
+                order.completedAt = new Date();
+                updateKitchenDisplay();
+            }
+        }
+
+        function removeOrder(orderId) {
+            kitchenOrders = kitchenOrders.filter(o => o.id !== orderId);
+            updateKitchenDisplay();
+        }
+
+        function startClock() {
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('orderTime').textContent = now.toLocaleTimeString();
+                
+                // Update kitchen display times every minute
+                if (now.getSeconds() === 0) {
+                    updateKitchenDisplay();
+                }
+            }, 1000);
+        }
+
+        // Update table info display
+        document.getElementById('tableNumber').addEventListener('input', updateTableInfo);
+        document.getElementById('ticketName').addEventListener('input', updateTableInfo);
+
+        function updateTableInfo() {
+            const table = document.getElementById('tableNumber').value;
+            const ticket = document.getElementById('ticketName').value;
+            const infoEl = document.getElementById('orderTableInfo');
+            
+            if (table) {
+                infoEl.textContent = `Table ${table}${ticket ? ` - ${ticket}` : ''}`;
+            } else {
+                infoEl.textContent = 'No table selected';
+            }
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
+                
